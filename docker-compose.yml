@@ -133,12 +133,14 @@ services:
     image: linuxserver/duckdns:latest
     container_name: duckdns
     network_mode: "service:gluetun" # Route through gluetun
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
       - SUBDOMAINS=ujly # Replace with your DuckDNS subdomain(s)
-      - TOKEN={DUCKDNS_TOKEN} # Replace with your DuckDNS token
+      - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
     restart: unless-stopped
 
   ############################
@@ -148,6 +150,8 @@ services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
