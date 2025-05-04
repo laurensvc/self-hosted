@@ -150,8 +150,12 @@ services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
-    depends_on:
-      - gluetun
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.<subdomain>.duckdns.org`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin.tls.certresolver=myresolver"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
     environment:
       - PUID=1000
       - PGID=1000
@@ -160,11 +164,30 @@ services:
       - /mnt/pool-main/portainer/jellyfin/config:/config
       - /mnt/pool-main/media/series:/data/series
       - /mnt/pool-main/media/movies:/data/movies
+    restart: unless-stopped
+
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=true" # Optional: Enable Traefik dashboard
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
-      - 8096:8096
-      # - 8920:8920 #optional
-      # - 7359:7359/udp #optional
-      # - 1900:1900/udp #optional
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/pool-main/portainer/traefik/letsencrypt:/letsencrypt
+      - /mnt/pool-main/portainer/traefik/config:/config
+    environment:
+      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN} # Your DuckDNS token
     restart: unless-stopped
 
   ############################
