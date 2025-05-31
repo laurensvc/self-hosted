@@ -40,17 +40,20 @@ services:
   # PROWLARR
   ############################
 
-  # prowlarr:
-  #   image: lscr.io/linuxserver/prowlarr:latest
-  #   container_name: prowlarr
-  #   network_mode: "service:gluetun"
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #   volumes:
-  #     - /mnt/.ix-apps/app_mounts/prowlarr/config:/config
-  #   restart: unless-stopped
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /mnt/.ix-apps/app_mounts/prowlarr/config:/config
+    restart: unless-stopped
 
   ############################
   # BAZARR
@@ -133,74 +136,74 @@ services:
   # TRAEFIK
   ############################
 
-  traefik:
-    image: traefik:latest
-    container_name: traefik
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:8081"
-      - "--log.level=DEBUG"
-      - "--accesslog=true"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DUCKDNS_SUBDOMAIN}.duckdns.org`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))"
-      - "traefik.http.routers.traefik.entrypoints=web"
-      - "traefik.http.routers.traefik.service=api@internal"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/.ix-apps/app_mounts/traefik/letsencrypt:/letsencrypt
-      - /mnt/.ix-apps/app_mounts/traefik/config:/config
-    restart: unless-stopped
+  # traefik:
+  #   image: traefik:latest
+  #   container_name: traefik
+  #   network_mode: "service:gluetun"
+  #   depends_on:
+  #     - gluetun
+  #   command:
+  #     - "--api.insecure=true"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:8081"
+  #     - "--log.level=DEBUG"
+  #     - "--accesslog=true"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.traefik.rule=Host(`traefik.${DUCKDNS_SUBDOMAIN}.duckdns.org`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))"
+  #     - "traefik.http.routers.traefik.entrypoints=web"
+  #     - "traefik.http.routers.traefik.service=api@internal"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /mnt/.ix-apps/app_mounts/traefik/letsencrypt:/letsencrypt
+  #     - /mnt/.ix-apps/app_mounts/traefik/config:/config
+  #   restart: unless-stopped
 
   ############################
   # DUCKDNS
   ############################
 
-  duckdns:
-    image: linuxserver/duckdns:latest
-    container_name: duckdns
-    network_mode: "service:gluetun" # Route through gluetun
-    depends_on:
-      - gluetun
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - SUBDOMAINS=${DUCKDNS_SUBDOMAIN} # Replace with your DuckDNS subdomain(s)
-      - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
-    restart: unless-stopped
+  # duckdns:
+  #   image: linuxserver/duckdns:latest
+  #   container_name: duckdns
+  #   network_mode: "service:gluetun" # Route through gluetun
+  #   depends_on:
+  #     - gluetun
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #     - SUBDOMAINS=${DUCKDNS_SUBDOMAIN} # Replace with your DuckDNS subdomain(s)
+  #     - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
+  #   restart: unless-stopped
 
   ############################
   # JELLYFIN
   ############################
 
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin:latest
-    container_name: jellyfin
-    # network_mode: "service:gluetun"
-    # depends_on:
-    #   - gluetun
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.jellyfin.rule=Host(`jelly.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
-    #   - "traefik.http.routers.jellyfin.entrypoints=web"
-    #   - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
-    ports:
-      - 8096:8096
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-    volumes:
-      - /mnt/.ix_apps/app_mounts/portainer/jellyfin/config:/config
-      - /mnt/pool-main/media/series:/data/series
-      - /mnt/pool-main/media/movies:/data/movies
-    restart: unless-stopped
+  # jellyfin:
+  #   image: lscr.io/linuxserver/jellyfin:latest
+  #   container_name: jellyfin
+  #   # network_mode: "service:gluetun"
+  #   # depends_on:
+  #   #   - gluetun
+  #   # labels:
+  #   #   - "traefik.enable=true"
+  #   #   - "traefik.http.routers.jellyfin.rule=Host(`jelly.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
+  #   #   - "traefik.http.routers.jellyfin.entrypoints=web"
+  #   #   - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+  #   ports:
+  #     - 8096:8096
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #   volumes:
+  #     - /mnt/.ix_apps/app_mounts/portainer/jellyfin/config:/config
+  #     - /mnt/pool-main/media/series:/data/series
+  #     - /mnt/pool-main/media/movies:/data/movies
+  #   restart: unless-stopped
 
   ############################
   # GLUETUN
@@ -210,10 +213,10 @@ services:
     image: qmcgaw/gluetun
     container_name: gluetun
     ports:
-      - 8081:8081 # traefik
+      # - 8081:8081 # traefik
       # - 443:443
       # - 8096:8096 #jellyfin
-      # - 9696:9696 #prowlarr
+      - 9696:9696 #prowlarr
       # - 7878:7878 #radarr
       # - 8989:8989 #sonarr
       # - 6767:6767 #bazarr
