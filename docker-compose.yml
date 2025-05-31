@@ -1,7 +1,24 @@
 ---
 services:
   ############################
-  # RADARR
+  # JELLYFIN
+  ############################
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /path/to/jellyfin/library:/config
+      - /path/to/tvseries:/data/tvshows
+      - /path/to/movies:/data/movies
+    ports:
+
+    restart: unless-stopped
+  ############################
+  # PLEX
   ############################
   plex:
     image: lscr.io/linuxserver/plex:latest
@@ -258,7 +275,6 @@ services:
     ports:
       # - 8081:8081 # traefik
       # - 443:443
-      # - 8096:8096 #jellyfin
       - 9696:9696 #prowlarr
       - 7878:7878 #radarr
       - 8989:8989 #sonarr
@@ -269,6 +285,19 @@ services:
       - 9091:9091 #transmission
       - 51413:51413 #transmission
       - 51413:51413/udp #transmission
+      - 32400:32400 #plex
+      - 1900:1900/udp #plex
+      - 5353:5353/udp #plex
+      - 8324:8324 #plex
+      - 32410:32410/udp #plex
+      - 32412:32412/udp #plex
+      - 32413:32413/udp #plex
+      - 32414:32414/udp #plex
+      - 32469:32469 #plex
+      - 8096:8096 #jellyfin
+      - 8920:8920 #jellyfin
+      - 7359:7359/udp #jellyfin
+
     cap_add:
       - NET_ADMIN
     devices:
