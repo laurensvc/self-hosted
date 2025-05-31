@@ -5,6 +5,13 @@ services:
   ############################
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     container_name: jellyfin
     network_mode: "service:gluetun"
     depends_on:
@@ -23,6 +30,13 @@ services:
   ############################
   plex:
     image: lscr.io/linuxserver/plex:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     container_name: plex
     network_mode: "service:gluetun"
     depends_on:
