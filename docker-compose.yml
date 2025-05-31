@@ -27,6 +27,17 @@ services:
     # network_mode: "service:gluetun"
     # depends_on:
     #   - gluetun
+    ports:
+      - 32400:32400 #plex
+      - 1900:1900/udp #plex
+      - 5353:5353/udp #plex
+      - 8324:8324 #plex
+      - 32410:32410/udp #plex
+      - 32412:32412/udp #plex
+      - 32413:32413/udp #plex
+      - 32414:32414/udp #plex
+      - 32469:32469 #plex
+
     environment:
       - PUID=1000
       - PGID=1000
