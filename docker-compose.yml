@@ -14,9 +14,9 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - /path/to/jellyfin/library:/config
-      - /path/to/tvseries:/data/tvshows
-      - /path/to/movies:/data/movies
+      - /mnt/.ix-apps/app_mounts/jellyfin/config:/config
+      - /mnt/pool-main/media/series:/data/tvshows
+      - /mnt/pool-main/media/movies:/data/movies
     restart: unless-stopped
   ############################
   # PLEX
