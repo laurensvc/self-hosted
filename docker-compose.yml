@@ -115,27 +115,44 @@ services:
     restart: unless-stopped
 
   ############################
-  # QBITTORRENT
+  # OVERSEERR
   ############################
 
-  # transmission:
-  #   image: lscr.io/linuxserver/transmission:latest
-  #   container_name: transmission
-  #   network_mode: "service:gluetun"
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #     - USER=admin
-  #     - PASS=${TRANSMISSION_PASSWORD}
-  #   volumes:
-  #     - ${MOUNTED_VOLUME}/transmission/data:/config
-  #     - ${MOUNTED_VOLUME}/downloads:/downloads #optional
-  #   ports:
-  #     - 9091:9091
-  #     - 51413:51413
-  #     - 51413:51413/udp
-  #   restart: unless-stopped
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /mnt/.ix-apps/app_mounts/overseerr/config:/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+
+  ############################
+  # TRANSMISSION
+  ############################
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - USER=admin
+      - PASS=${TRANSMISSION_PASSWORD}
+    volumes:
+      - /mnt/.ix-apps/app_mounts/transmission/data:/config
+      - /mnt/pool-main/media/downloads:/downloads #optional
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
 
   ############################
   # TRAEFIK
@@ -227,6 +244,7 @@ services:
       - 6767:6767 #bazarr
       - 8686:8686 #lidarr
       - 8787:8787 #readarr
+      - 5055:5055 #readarr
     cap_add:
       - NET_ADMIN
     devices:
