@@ -110,85 +110,89 @@ services:
   # QBITTORRENT
   ############################
 
-  # qbittorrent:
-  #   image: lscr.io/linuxserver/qbittorrent:latest
-  #   container_name: qbittorrent
+  # transmission:
+  #   image: lscr.io/linuxserver/transmission:latest
+  #   container_name: transmission
   #   network_mode: "service:gluetun"
   #   environment:
   #     - PUID=1000
   #     - PGID=1000
   #     - TZ=Etc/UTC
-  #     - WEBUI_PORT=12000
-  #     - TORRENTING_PORT=6881
+  #     - USER=admin
+  #     - PASS=${TRANSMISSION_PASSWORD}
   #   volumes:
-  #     - /media/arr/qbittorrent/config:/config
-  #     - /media/arr/qbittorrent/downloads:/downloads #optional
+  #     - ${MOUNTED_VOLUME}/transmission/data:/config
+  #     - ${MOUNTED_VOLUME}/downloads:/downloads #optional
+  #   ports:
+  #     - 9091:9091
+  #     - 51413:51413
+  #     - 51413:51413/udp
   #   restart: unless-stopped
 
   ############################
   # DUCKDNS
   ############################
 
-  duckdns:
-    image: linuxserver/duckdns:latest
-    container_name: duckdns
-    network_mode: "service:gluetun" # Route through gluetun
-    depends_on:
-      - gluetun
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - SUBDOMAINS=ujly # Replace with your DuckDNS subdomain(s)
-      - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
-    restart: unless-stopped
+  # duckdns:
+  #   image: linuxserver/duckdns:latest
+  #   container_name: duckdns
+  #   network_mode: "service:gluetun" # Route through gluetun
+  #   depends_on:
+  #     - gluetun
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #     - SUBDOMAINS=${DUCKDNS_SUBDOMAINS} # Replace with your DuckDNS subdomain(s)
+  #     - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
+  #   restart: unless-stopped
 
   ############################
   # JELLYFIN
   ############################
 
-  jellyfin:
-    image: lscr.io/linuxserver/jellyfin:latest
-    container_name: jellyfin
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.<subdomain>.duckdns.org`)"
-      - "traefik.http.routers.jellyfin.entrypoints=websecure"
-      - "traefik.http.routers.jellyfin.tls.certresolver=myresolver"
-      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-    volumes:
-      - /mnt/pool-main/portainer/jellyfin/config:/config
-      - /mnt/pool-main/media/series:/data/series
-      - /mnt/pool-main/media/movies:/data/movies
-    restart: unless-stopped
+  # jellyfin:
+  #   image: lscr.io/linuxserver/jellyfin:latest
+  #   container_name: jellyfin
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.jellyfin.rule=Host(`${JELLYFIN_SUBDOMAIN}.duckdns.org`)"
+  #     - "traefik.http.routers.jellyfin.entrypoints=websecure"
+  #     - "traefik.http.routers.jellyfin.tls.certresolver=myresolver"
+  #     - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #   volumes:
+  #     - /mnt/pool-main/portainer/jellyfin/config:/config
+  #     - /mnt/pool-main/media/series:/data/series
+  #     - /mnt/pool-main/media/movies:/data/movies
+  #   restart: unless-stopped
 
-  traefik:
-    image: traefik:v2.10
-    container_name: traefik
-    command:
-      - "--api.insecure=true" # Optional: Enable Traefik dashboard
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
-      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80" # HTTP
-      - "443:443" # HTTPS
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /mnt/pool-main/portainer/traefik/letsencrypt:/letsencrypt
-      - /mnt/pool-main/portainer/traefik/config:/config
-    environment:
-      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN} # Your DuckDNS token
-    restart: unless-stopped
+  # traefik:
+  #   image: traefik:v2.10
+  #   container_name: traefik
+  #   command:
+  #     - "--api.insecure=true" # Optional: Enable Traefik dashboard
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+  #     - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
+  #     - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+  #     - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #   ports:
+  #     - "80:80" # HTTP
+  #     - "443:443" # HTTPS
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /mnt/pool-main/portainer/traefik/letsencrypt:/letsencrypt
+  #     - /mnt/pool-main/portainer/traefik/config:/config
+  #   environment:
+  #     - DUCKDNS_TOKEN=${DUCKDNS_TOKEN} # Your DuckDNS token
+  #   restart: unless-stopped
 
   ############################
   # GLUETUN
@@ -198,23 +202,21 @@ services:
     image: qmcgaw/gluetun
     container_name: gluetun
     ports:
-      - 20000:8096 #jellyfin
-      # - 9696:9696 #prowlarr
-      # - 7878:7878 #radarr
-      # - 8989:8989 #sonarr
-      # - 6767:6767 #bazarr
-      # - 8686:8686 #lidarr
-      # - 8787:8787 #readarr
-      # - 12000:12000 #qbittorrent
-      # - 6881:6881 #qbittorrent
-      # - 6881:6881/udp #qbittorrent
+      - 80:80
+      - 443:443
+        # - 8096:8096 #jellyfin
+        # - 9696:9696 #prowlarr
+        # - 7878:7878 #radarr
+        # - 8989:8989 #sonarr
+        # - 6767:6767 #bazarr
+        # - 8686:8686 #lidarr
+        # - 8787:8787 #readarr
     cap_add:
       - NET_ADMIN
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
-      - VPN_SERVICE_PROVIDER=nordvpn
-      - VPN_TYPE=openvpn
+      - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
       - OPENVPN_USER=${VPN_USER}
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
