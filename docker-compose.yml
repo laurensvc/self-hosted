@@ -64,6 +64,39 @@ services:
       - /mnt/pool-main/media/movies:/movies
     restart: unless-stopped
 
+  plex-local:
+    image: lscr.io/linuxserver/plex:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    container_name: plex-local
+    network_mode: bridge
+    ports:
+      - 32401:32400 # Avoid conflict with VPN Plex (32400)
+      - 1901:1900/udp
+      - 5354:5353/udp
+      - 8325:8324
+      - 32411:32410/udp
+      - 32415:32412/udp
+      - 32416:32413/udp
+      - 32417:32414/udp
+      - 32470:32469
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM=claim-KWdNouGJLD72xyqbELLs
+    volumes:
+      - /mnt/.ix-apps/app_mounts/plex-local/config:/config
+      - /mnt/pool-main/media/series:/tv
+      - /mnt/pool-main/media/movies:/movies
+    restart: unless-stopped
+
   ############################
   # RADARR
   ############################
