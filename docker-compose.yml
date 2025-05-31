@@ -127,8 +127,6 @@ services:
       - TZ=Etc/UTC
     volumes:
       - /mnt/.ix-apps/app_mounts/overseerr/config:/config
-    ports:
-      - 5055:5055
     restart: unless-stopped
 
   ############################
@@ -148,10 +146,6 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/transmission/data:/config
       - /mnt/pool-main/media/downloads:/downloads #optional
-    ports:
-      - 9091:9091
-      - 51413:51413
-      - 51413:51413/udp
     restart: unless-stopped
 
   ############################
@@ -244,7 +238,10 @@ services:
       - 6767:6767 #bazarr
       - 8686:8686 #lidarr
       - 8787:8787 #readarr
-      - 5055:5055 #readarr
+      - 5055:5055 #overseerr
+      - 9091:9091 #transmission
+      - 51413:51413 #transmission
+      - 51413:51413/udp #transmission
     cap_add:
       - NET_ADMIN
     devices:
