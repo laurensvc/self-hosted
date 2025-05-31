@@ -133,7 +133,7 @@ services:
   # TRAEFIK
   ############################
 
-  traefik:
+ traefik:
     image: traefik:latest
     container_name: traefik
     network_mode: "service:gluetun"
@@ -146,6 +146,7 @@ services:
       - "--entrypoints.web.address=:8081"
       - "--log.level=DEBUG"
       - "--accesslog=true"
+    labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.rule=Host(`traefik.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
       - "traefik.http.routers.traefik.entrypoints=web"
