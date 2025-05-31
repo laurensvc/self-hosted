@@ -6,6 +6,9 @@ services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
@@ -14,8 +17,6 @@ services:
       - /path/to/jellyfin/library:/config
       - /path/to/tvseries:/data/tvshows
       - /path/to/movies:/data/movies
-    ports:
-
     restart: unless-stopped
   ############################
   # PLEX
