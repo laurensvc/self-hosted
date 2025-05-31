@@ -133,19 +133,19 @@ services:
   # DUCKDNS
   ############################
 
-  # duckdns:
-  #   image: linuxserver/duckdns:latest
-  #   container_name: duckdns
-  #   network_mode: "service:gluetun" # Route through gluetun
-  #   depends_on:
-  #     - gluetun
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #     - SUBDOMAINS=${DUCKDNS_SUBDOMAINS} # Replace with your DuckDNS subdomain(s)
-  #     - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
-  #   restart: unless-stopped
+  duckdns:
+    image: linuxserver/duckdns:latest
+    container_name: duckdns
+    network_mode: "service:gluetun" # Route through gluetun
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUBDOMAINS=${DUCKDNS_SUBDOMAINS} # Replace with your DuckDNS subdomain(s)
+      - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
+    restart: unless-stopped
 
   ############################
   # JELLYFIN
@@ -177,21 +177,14 @@ services:
   #     - "--api.insecure=true" # Optional: Enable Traefik dashboard
   #     - "--providers.docker=true"
   #     - "--providers.docker.exposedbydefault=false"
-  #     - "--entrypoints.web.address=:80"
-  #     - "--entrypoints.websecure.address=:443"
-  #     - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
-  #     - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=duckdns"
-  #     - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
-  #     - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #     - "--entrypoints.web.address=:8081"
+  #     - "--entrypoints.http.http.tls=false"
   #   ports:
-  #     - "80:80" # HTTP
-  #     - "443:443" # HTTPS
+  #     - "8081:8081" # HTTP
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock
-  #     - /mnt/pool-main/portainer/traefik/letsencrypt:/letsencrypt
-  #     - /mnt/pool-main/portainer/traefik/config:/config
-  #   environment:
-  #     - DUCKDNS_TOKEN=${DUCKDNS_TOKEN} # Your DuckDNS token
+  #     - /mnt/.ix-apps/app_mounts/traefik/letsencrypt:/letsencrypt
+  #     - /mnt/.ix-apps/app_mounts/traefik/config:/config
   #   restart: unless-stopped
 
   ############################
