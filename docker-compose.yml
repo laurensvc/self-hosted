@@ -202,15 +202,15 @@ services:
     image: qmcgaw/gluetun
     container_name: gluetun
     ports:
-      - 80:80
-      - 443:443
-        # - 8096:8096 #jellyfin
-        # - 9696:9696 #prowlarr
-        # - 7878:7878 #radarr
-        # - 8989:8989 #sonarr
-        # - 6767:6767 #bazarr
-        # - 8686:8686 #lidarr
-        # - 8787:8787 #readarr
+      # - 80:80
+      # - 443:443
+      - 8096:8096 #jellyfin
+      # - 9696:9696 #prowlarr
+      # - 7878:7878 #radarr
+      # - 8989:8989 #sonarr
+      # - 6767:6767 #bazarr
+      # - 8686:8686 #lidarr
+      # - 8787:8787 #readarr
     cap_add:
       - NET_ADMIN
     devices:
