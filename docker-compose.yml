@@ -144,7 +144,12 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:8081"
-      - "--entrypoints.http.http.tls=false"
+      - "--log.level=DEBUG"
+      - "--accesslog=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.service=api@internal"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/.ix-apps/app_mounts/traefik/letsencrypt:/letsencrypt
