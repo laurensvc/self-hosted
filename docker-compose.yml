@@ -24,9 +24,9 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
+    # network_mode: "service:gluetun"
+    # depends_on:
+    #   - gluetun
     environment:
       - PUID=1000
       - PGID=1000
