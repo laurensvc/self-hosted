@@ -182,14 +182,16 @@ services:
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.jellyfin.rule=Host(`jelly.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
-      - "traefik.http.routers.jellyfin.entrypoints=web"
-      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+    # network_mode: "service:gluetun"
+    # depends_on:
+    #   - gluetun
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.jellyfin.rule=Host(`jelly.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
+    #   - "traefik.http.routers.jellyfin.entrypoints=web"
+    #   - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+    ports:
+      - 8096:8096
     environment:
       - PUID=1000
       - PGID=1000
