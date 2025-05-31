@@ -104,6 +104,8 @@ services:
     image: lscr.io/linuxserver/readarr:develop
     container_name: readarr
     network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
@@ -121,6 +123,9 @@ services:
   overseerr:
     image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
@@ -137,6 +142,8 @@ services:
     image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
     network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
