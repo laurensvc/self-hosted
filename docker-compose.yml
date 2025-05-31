@@ -3,7 +3,27 @@ services:
   ############################
   # RADARR
   ############################
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM= #optional
+    volumes:
+      - /mnt/.ix-apps/app_mounts/plex/config:/config
+      - /mnt/pool-main/media/series:/tv
+      - /mnt/pool-main/media/movies:/movies
+    restart: unless-stopped
 
+  ############################
+  # RADARR
+  ############################
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
