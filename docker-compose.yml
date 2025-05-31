@@ -148,7 +148,7 @@ services:
       - "--accesslog=true"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DUCKDNS_SUBDOMAIN}.duckdns.org`) && PathPrefix(`/dashboard`) || PathPrefix(`/api`)"
       - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.routers.traefik.service=api@internal"
     volumes:
