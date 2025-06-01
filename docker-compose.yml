@@ -74,7 +74,7 @@ services:
               count: all
               capabilities: [gpu]
     container_name: plex-local
-    network_mode: host
+    network_mode: bridge
     ports:
       - 32401:32400 # Avoid conflict with VPN Plex (32400)
       - 1901:1900/udp
