@@ -25,77 +25,6 @@ services:
       - /mnt/pool-main/media/series:/data/tvshows
       - /mnt/pool-main/media/movies:/data/movies
     restart: unless-stopped
-  ############################
-  # PLEX
-  ############################
-  plex:
-    image: lscr.io/linuxserver/plex:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    container_name: plex
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
-    # ports:
-    #   - 32400:32400 #plex
-    #   - 1900:1900/udp #plex
-    #   - 5353:5353/udp #plex
-    #   - 8324:8324 #plex
-    #   - 32410:32410/udp #plex
-    #   - 32412:32412/udp #plex
-    #   - 32413:32413/udp #plex
-    #   - 32414:32414/udp #plex
-    #   - 32469:32469 #plex
-
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - VERSION=docker
-      - PLEX_CLAIM=claim-QuA5aYBfFCuKsQG9fotK
-    volumes:
-      - /mnt/.ix-apps/app_mounts/plex/config:/config
-      - /mnt/pool-main/media/series:/tv
-      - /mnt/pool-main/media/movies:/movies
-    restart: unless-stopped
-
-  plex-local:
-    image: lscr.io/linuxserver/plex:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    container_name: plex-local
-    network_mode: bridge
-    ports:
-      - 32401:32400 # Avoid conflict with VPN Plex (32400)
-      - 1901:1900/udp
-      - 5354:5353/udp
-      - 8325:8324
-      - 32411:32410/udp
-      - 32415:32412/udp
-      - 32416:32413/udp
-      - 32417:32414/udp
-      - 32470:32469
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - VERSION=docker
-      - PLEX_CLAIM=claim-KWdNouGJLD72xyqbELLs
-    volumes:
-      - /mnt/.ix-apps/app_mounts/plex-local/config:/config
-      - /mnt/pool-main/media/series:/tv
-      - /mnt/pool-main/media/movies:/movies
-    restart: unless-stopped
 
   ############################
   # RADARR
@@ -216,18 +145,35 @@ services:
   # OVERSEERR
   ############################
 
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
+  # overseerr:
+  #   image: lscr.io/linuxserver/overseerr:latest
+  #   container_name: overseerr
+  #   network_mode: "service:gluetun"
+  #   depends_on:
+  #     - gluetun
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Etc/UTC
+  #   volumes:
+  #     - /mnt/.ix-apps/app_mounts/overseerr/config:/config
+  #   restart: unless-stopped
+
+  ############################
+  # JELLYSEERR
+  ############################
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
     network_mode: "service:gluetun"
     depends_on:
       - gluetun
     environment:
-      - PUID=1000
-      - PGID=1000
+      - LOG_LEVEL=debug
       - TZ=Etc/UTC
     volumes:
-      - /mnt/.ix-apps/app_mounts/overseerr/config:/config
+      - /mnt/.ix-apps/app_mounts/jellyseerr/config:/app/config
     restart: unless-stopped
 
   ############################
@@ -283,46 +229,19 @@ services:
   # DUCKDNS
   ############################
 
-  # duckdns:
-  #   image: linuxserver/duckdns:latest
-  #   container_name: duckdns
-  #   network_mode: "service:gluetun" # Route through gluetun
-  #   depends_on:
-  #     - gluetun
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #     - SUBDOMAINS=${DUCKDNS_SUBDOMAIN} # Replace with your DuckDNS subdomain(s)
-  #     - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
-  #   restart: unless-stopped
-
-  ############################
-  # JELLYFIN
-  ############################
-
-  # jellyfin:
-  #   image: lscr.io/linuxserver/jellyfin:latest
-  #   container_name: jellyfin
-  #   # network_mode: "service:gluetun"
-  #   # depends_on:
-  #   #   - gluetun
-  #   # labels:
-  #   #   - "traefik.enable=true"
-  #   #   - "traefik.http.routers.jellyfin.rule=Host(`jelly.${DUCKDNS_SUBDOMAIN}.duckdns.org`)"
-  #   #   - "traefik.http.routers.jellyfin.entrypoints=web"
-  #   #   - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
-  #   ports:
-  #     - 8096:8096
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #   volumes:
-  #     - /mnt/.ix_apps/app_mounts/portainer/jellyfin/config:/config
-  #     - /mnt/pool-main/media/series:/data/series
-  #     - /mnt/pool-main/media/movies:/data/movies
-  #   restart: unless-stopped
+  duckdns:
+    image: linuxserver/duckdns:latest
+    container_name: duckdns
+    network_mode: "service:gluetun" # Route through gluetun
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUBDOMAINS=${DUCKDNS_SUBDOMAIN} # Replace with your DuckDNS subdomain(s)
+      - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
+    restart: unless-stopped
 
   ############################
   # GLUETUN
@@ -344,16 +263,16 @@ services:
       - 9091:9091 #transmission
       - 51413:51413 #transmission
       - 51413:51413/udp #transmission
-      - 32400:32400 #plex
-      - 1900:1900/udp #plex
-      - 5353:5353/udp #plex
-      - 8324:8324 #plex
-      - 32410:32410/udp #plex
-      - 32412:32412/udp #plex
-      - 32413:32413/udp #plex
-      - 32414:32414/udp #plex
-      - 32469:32469 #plex
-      - 8096:8096 #jellyfin
+      # - 32400:32400 #plex
+      # - 1900:1900/udp #plex
+      # - 5353:5353/udp #plex
+      # - 8324:8324 #plex
+      # - 32410:32410/udp #plex
+      # - 32412:32412/udp #plex
+      # - 32413:32413/udp #plex
+      # - 32414:32414/udp #plex
+      # - 32469:32469 #plex
+      - 10000:8096 #jellyfin
       - 8920:8920 #jellyfin
       - 7359:7359/udp #jellyfin
 
