@@ -13,9 +13,9 @@ services:
               count: all
               capabilities: [gpu]
     container_name: jellyfin
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
+    network_mode: bridge
+    ports:
+      - 10000:8096
     environment:
       - PUID=1000
       - PGID=1000
@@ -272,7 +272,7 @@ services:
       # - 32413:32413/udp #plex
       # - 32414:32414/udp #plex
       # - 32469:32469 #plex
-      - 10000:8096 #jellyfin
+      # - 10000:8096 #jellyfin
       - 8920:8920 #jellyfin
       - 7359:7359/udp #jellyfin
 
