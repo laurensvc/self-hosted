@@ -3,6 +3,9 @@ services:
   nzbget:
     image: lscr.io/linuxserver/nzbget:latest
     container_name: nzbget
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
     environment:
       - PUID=1000
       - PGID=1000
@@ -11,9 +14,7 @@ services:
       - NZBGET_PASS=${NZBGET_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/nzbget/config:/config
-      - /mnt/pool-main/media/downloads:/downloads #optional
-    ports:
-      - 6789:6789
+      - /mnt/pool-main/media/downloads:/downloads
     restart: unless-stopped
   ############################
   # JELLYFIN
@@ -289,6 +290,7 @@ services:
       # - 32469:32469 #plex
       # - 10000:8096 #jellyfin
       - 8920:8920 #jellyfin
+      - 6789:6789
       - 7359:7359/udp #jellyfin
 
     cap_add:
