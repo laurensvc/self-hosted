@@ -303,3 +303,4 @@ services:
       - OPENVPN_USER=${VPN_USER}
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
+    restart: unless-stopped
