@@ -64,7 +64,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
       - VERSION=docker
-      - PLEX_CLAIM=claim-a8_m7uedF_NmLHD4SWDA
+      - PLEX_CLAIM=claim-tzv77YPiUp5HezVyVxVi
     volumes:
       - /mnt/.ix-apps/app_mounts/plex/config:/config
       - /mnt/pool-main/media/series:/tv
