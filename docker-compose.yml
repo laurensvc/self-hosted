@@ -43,6 +43,28 @@ services:
     restart: unless-stopped
 
   ############################
+  # PLEX
+  ############################
+
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM=claim-wjFKumFv4Gf-9mvDF-XB
+    volumes:
+      - /mnt/.ix-apps/app_mounts/plex/config:/config
+      - /mnt/pool-main/media/series:/tv
+      - /mnt/pool-main/media/movies:/movies
+    restart: unless-stopped
+
+  ############################
   # RADARR
   ############################
   radarr:
@@ -158,33 +180,12 @@ services:
     restart: unless-stopped
 
   ############################
-  # OVERSEERR
-  ############################
-
-  # overseerr:
-  #   image: lscr.io/linuxserver/overseerr:latest
-  #   container_name: overseerr
-  #   network_mode: "service:gluetun"
-  #   depends_on:
-  #     - gluetun
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #   volumes:
-  #     - /mnt/.ix-apps/app_mounts/overseerr/config:/config
-  #   restart: unless-stopped
-
-  ############################
   # JELLYSEERR
   ############################
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
     environment:
       - LOG_LEVEL=debug
       - TZ=Etc/UTC
