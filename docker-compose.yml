@@ -52,6 +52,13 @@ services:
     network_mode: "service:gluetun"
     depends_on:
       - gluetun
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     environment:
       - PUID=1000
       - PGID=1000
@@ -187,7 +194,7 @@ services:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
     ports:
-      - 8096:8096
+      - 5055:5055
     environment:
       - LOG_LEVEL=debug
       - TZ=Etc/UTC
