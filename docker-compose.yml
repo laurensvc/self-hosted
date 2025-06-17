@@ -49,9 +49,6 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
-    network_mode: "service:gluetun"
-    depends_on:
-      - gluetun
     deploy:
       resources:
         reservations:
@@ -59,6 +56,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+    network_mode: host
     environment:
       - PUID=1000
       - PGID=1000
@@ -277,22 +275,12 @@ services:
     image: qmcgaw/gluetun
     container_name: gluetun
     ports:
-      # - 8081:8081 # traefik
-      # - 443:443
-      - 1900:1900/udp #plex
-      - 32400:32400 #plex
-      - 32410:32410/udp #plex
-      - 32412:32412/udp #plex
-      - 32413:32413/udp #plex
-      - 32414:32414/udp #plex
-      - 32469:32469 #plex
       - 51413:51413 #transmission
       - 51413:51413/udp #transmission
       - 6767:6767 #bazarr
       - 6789:6789
       - 7359:7359/udp #jellyfin
       - 7878:7878 #radarr
-      - 8324:8324 #plex
       - 8686:8686 #lidarr
       - 8787:8787 #readarr
       - 8920:8920 #jellyfin
