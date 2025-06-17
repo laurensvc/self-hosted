@@ -57,7 +57,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
       - VERSION=docker
-      - PLEX_CLAIM=claim-wjFKumFv4Gf-9mvDF-XB
+      - PLEX_CLAIM=claim-a8_m7uedF_NmLHD4SWDA
     volumes:
       - /mnt/.ix-apps/app_mounts/plex/config:/config
       - /mnt/pool-main/media/series:/tv
@@ -186,6 +186,8 @@ services:
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
+    ports:
+      - 8096:8096
     environment:
       - LOG_LEVEL=debug
       - TZ=Etc/UTC
@@ -276,20 +278,18 @@ services:
       - 6767:6767 #bazarr
       - 8686:8686 #lidarr
       - 8787:8787 #readarr
-      - 5055:5055 #overseerr
       - 9091:9091 #transmission
       - 51413:51413 #transmission
       - 51413:51413/udp #transmission
-      # - 32400:32400 #plex
-      # - 1900:1900/udp #plex
-      # - 5353:5353/udp #plex
-      # - 8324:8324 #plex
-      # - 32410:32410/udp #plex
-      # - 32412:32412/udp #plex
-      # - 32413:32413/udp #plex
-      # - 32414:32414/udp #plex
-      # - 32469:32469 #plex
-      # - 10000:8096 #jellyfin
+      - 32400:32400 #plex
+      - 1900:1900/udp #plex
+      - 5353:5353/udp #plex
+      - 8324:8324 #plex
+      - 32410:32410/udp #plex
+      - 32412:32412/udp #plex
+      - 32413:32413/udp #plex
+      - 32414:32414/udp #plex
+      - 32469:32469 #plex
       - 8920:8920 #jellyfin
       - 6789:6789
       - 7359:7359/udp #jellyfin
