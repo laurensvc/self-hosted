@@ -9,13 +9,15 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
       - NZBGET_USER=admin
       - NZBGET_PASS=${NZBGET_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/nzbget/config:/config
       - /mnt/pool-main/media/downloads:/downloads
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   ############################
   # JELLYFIN
   ############################
@@ -35,12 +37,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/jellyfin/config:/config
       - /mnt/pool-main/media/series:/data/tvshows
       - /mnt/pool-main/media/movies:/data/movies
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # PLEX
@@ -60,7 +64,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
       - VERSION=docker
       - PLEX_CLAIM=claim-1sArduhvJJ87ywxKQeHr
     volumes:
@@ -68,6 +72,8 @@ services:
       - /mnt/pool-main/media/series:/tv
       - /mnt/pool-main/media/movies:/movies
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # RADARR
@@ -81,12 +87,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/radarr/config:/config
       - /mnt/pool-main/media/movies:/movies #optional
       - /mnt/pool-main/media/downloads:/downloads #optional
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # SONARR
@@ -101,12 +109,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/sonarr/config:/config
       - /mnt/pool-main/media/series:/tv #optional
       - /mnt/pool-main/media/downloads:/downloads #optional
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # PROWLARR
@@ -121,10 +131,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/prowlarr/config:/config
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # BAZARR
@@ -139,12 +151,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/bazarr/config:/config
       - /mnt/pool-main/media/movies:/movies
       - /mnt/pool-main/media/series:/tv
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # LIDARR
@@ -157,12 +171,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/lidarr/config:/config
       - /mnt/pool-main/media/music:/music #optional
       - /mnt/pool-main/media/downloads:/downloads #optional
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # READARR
@@ -177,12 +193,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/readarr/config:/config
       - /mnt/pool-main/media/books:/books #optional
       - /mnt/pool-main/media/downloads:/downloads #optional
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # JELLYSEERR
@@ -195,10 +213,12 @@ services:
       - 5055:5055
     environment:
       - LOG_LEVEL=debug
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/jellyseerr/config:/app/config
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # TRANSMISSION
@@ -213,16 +233,18 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
       - USER=admin
       - PASS=${TRANSMISSION_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/transmission/data:/config
       - /mnt/pool-main/media/downloads:/downloads #optional
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
-  # TRAEFIK
+  # TRAEFIK (commented)
   ############################
 
   # traefik:
@@ -262,10 +284,12 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/Brussels
       - SUBDOMAINS=${DUCKDNS_SUBDOMAIN} # Replace with your DuckDNS subdomain(s)
       - TOKEN=${DUCKDNS_TOKEN} # Replace with your DuckDNS token
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
   ############################
   # GLUETUN
@@ -297,4 +321,24 @@ services:
       - OPENVPN_USER=${VPN_USER}
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
+      - TZ=Europe/Brussels
+    restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  ############################
+  # WATCHTOWER (automatic updates)
+  ############################
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=Europe/Brussels
+      - WATCHTOWER_SCHEDULE=0 0 3 * * *
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_NO_STARTUP_MESSAGE=true
+      - WATCHTOWER_LABEL_ENABLE=true
+    command: --rolling-restart
     restart: unless-stopped
