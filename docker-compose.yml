@@ -76,6 +76,27 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   ############################
+  # TAUTULLI
+  ############################
+
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    depends_on:
+      - plex
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Brussels
+    volumes:
+      - /mnt/.ix-apps/app_mounts/tautulli/config:/config
+    ports:
+      - 8181:8181
+    restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  ############################
   # RADARR
   ############################
   radarr:
@@ -322,8 +343,6 @@ services:
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
       - TZ=Europe/Brussels
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.68.0/24
-      - FIREWALL_INPUT_PORTS=7878,8989,8686,8787,9696,6767,9091
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
