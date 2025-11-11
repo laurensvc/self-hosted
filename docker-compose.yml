@@ -322,6 +322,8 @@ services:
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
       - TZ=Europe/Brussels
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.68.0/24
+      - FIREWALL_INPUT_PORTS=7878,8989,8686,8787,9696,6767,9091
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
