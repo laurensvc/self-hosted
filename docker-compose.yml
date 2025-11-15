@@ -6,7 +6,7 @@ services:
   #######################################################
   gluetun:
     image: qmcgaw/gluetun
-    container_name: gluetun
+    container_name: gluetun_vpn
     networks: [vpn_net]
     cap_add:
       - NET_ADMIN
@@ -38,7 +38,7 @@ services:
   #######################################################
   plex:
     image: lscr.io/linuxserver/plex:latest
-    container_name: plex
+    container_name: plex_vpn
     # Host mode recommended for Plex discovery/DLNA
     network_mode: host
     runtime: nvidia
@@ -74,7 +74,7 @@ services:
   #######################################################
   tautulli:
     image: lscr.io/linuxserver/tautulli:latest
-    container_name: tautulli
+    container_name: tautulli_vpn
     networks: [media_net]
     depends_on:
       - plex
@@ -102,7 +102,7 @@ services:
   #######################################################
   transmission:
     image: lscr.io/linuxserver/transmission:latest
-    container_name: transmission
+    container_name: transmission_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -130,7 +130,7 @@ services:
   #######################################################
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
-    container_name: prowlarr
+    container_name: prowlarr_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -155,7 +155,7 @@ services:
   #######################################################
   radarr:
     image: lscr.io/linuxserver/radarr:latest
-    container_name: radarr
+    container_name: radarr_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -179,7 +179,7 @@ services:
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr
+    container_name: sonarr_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -203,7 +203,7 @@ services:
 
   lidarr:
     image: lscr.io/linuxserver/lidarr:latest
-    container_name: lidarr
+    container_name: lidarr_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -225,33 +225,9 @@ services:
       - com.centurylinklabs.watchtower.enable=true
       - autoheal=true
 
-  readarr:
-    image: lscr.io/linuxserver/readarr:latest
-    container_name: readarr
-    network_mode: "service:gluetun"
-    depends_on: [gluetun]
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-    volumes:
-      - /mnt/.ix-apps/app_mounts/readarr/config:/config
-      - /mnt/pool-main/media/books:/books
-      - /mnt/pool-main/media/downloads:/downloads
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:8787/system/status || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
-
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
-    container_name: bazarr
+    container_name: bazarr_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -278,7 +254,7 @@ services:
   #######################################################
   recyclarr:
     image: recyclarr/recyclarr:latest
-    container_name: recyclarr
+    container_name: recyclarr_vpn
     networks: [media_net]   # independent; only needs outbound internet if pulling templates
     depends_on:
       - radarr
@@ -304,7 +280,7 @@ services:
   #######################################################
   overseerr:
     image: sctx/overseerr:latest
-    container_name: overseerr
+    container_name: overseerr_vpn
     network_mode: "service:gluetun"
     depends_on: [gluetun]
     environment:
@@ -327,7 +303,7 @@ services:
   #######################################################
   npm:
     image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager
+    container_name: nginx-proxy-manager_vpn
     networks: [media_net, vpn_net]
     ports:
       - "80:80"
@@ -355,7 +331,7 @@ services:
   #######################################################
   watchtower:
     image: containrrr/watchtower:latest
-    container_name: watchtower
+    container_name: watchtower_vpn
     networks: [media_net]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -370,7 +346,7 @@ services:
 
   autoheal:
     image: willfarrell/autoheal:latest
-    container_name: autoheal
+    container_name: autoheal_vpn
     networks: [media_net]
     environment:
       - AUTOHEAL_CONTAINER_LABEL=autoheal
