@@ -36,38 +36,38 @@ services:
   #######################################################
   # MEDIA SERVER: Plex (GPU)
   #######################################################
-  plex:
-    image: lscr.io/linuxserver/plex:latest
-    container_name: plex_vpn
-    # Host mode recommended for Plex discovery/DLNA
-    network_mode: host
-    runtime: nvidia
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-      - VERSION=docker
-    volumes:
-      - /mnt/.ix-apps/app_mounts/plex/config:/config
-      - /mnt/pool-main/media/series:/tv
-      - /mnt/pool-main/media/movies:/movies
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:32400/web/index.html || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
+  # plex:
+  #   image: lscr.io/linuxserver/plex:latest
+  #   container_name: plex_vpn
+  #   # Host mode recommended for Plex discovery/DLNA
+  #   network_mode: host
+  #   runtime: nvidia
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=Europe/Brussels
+  #     - VERSION=docker
+  #   volumes:
+  #     - /mnt/.ix-apps/app_mounts/plex/config:/config
+  #     - /mnt/pool-main/media/series:/tv
+  #     - /mnt/pool-main/media/movies:/movies
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -fs http://localhost:32400/web/index.html || exit 1"]
+  #     interval: 2m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 60s
+  #   restart: unless-stopped
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #     - autoheal=true
 
   #######################################################
   # MONITORING: Tautulli (Plex stats)
@@ -301,30 +301,30 @@ services:
   #######################################################
   # REVERSE PROXY: Nginx Proxy Manager (public-facing)
   #######################################################
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager_vpn
-    networks: [media_net, vpn_net]
-    ports:
-      - "80:80"
-      - "81:81"
-      - "443:443"
-    environment:
-      - TZ=Europe/Brussels
-    volumes:
-      - /mnt/.ix-apps/app_mounts/npm/data:/data
-      - /mnt/.ix-apps/app_mounts/npm/letsencrypt:/etc/letsencrypt
-      - /mnt/.ix-apps/app_mounts/npm/logs:/logs
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:81 || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
+  # npm:
+  #   image: jc21/nginx-proxy-manager:latest
+  #   container_name: nginx-proxy-manager_vpn
+  #   networks: [media_net, vpn_net]
+  #   ports:
+  #     - "80:80"
+  #     - "81:81"
+  #     - "443:443"
+  #   environment:
+  #     - TZ=Europe/Brussels
+  #   volumes:
+  #     - /mnt/.ix-apps/app_mounts/npm/data:/data
+  #     - /mnt/.ix-apps/app_mounts/npm/letsencrypt:/etc/letsencrypt
+  #     - /mnt/.ix-apps/app_mounts/npm/logs:/logs
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -fs http://localhost:81 || exit 1"]
+  #     interval: 2m
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 30s
+  #   restart: unless-stopped
+  #   labels:
+  #     - com.centurylinklabs.watchtower.enable=true
+  #     - autoheal=true
 
   #######################################################
   # MAINTENANCE
