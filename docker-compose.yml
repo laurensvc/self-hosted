@@ -76,8 +76,8 @@ services:
     image: lscr.io/linuxserver/tautulli:latest
     container_name: tautulli_vpn
     networks: [media_net]
-    depends_on:
-      - plex
+    # depends_on:
+    #   - plex
     ports:
       - "8181:8181"
     environment:
