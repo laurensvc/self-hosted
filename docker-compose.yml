@@ -1,163 +1,92 @@
-version: "3.8"
+version: "3.9"
 
+###############################################################
+# NETWORKS
+###############################################################
+networks:
+  media_net:
+    driver: bridge
+  vpn_net:
+    driver: bridge
+
+###############################################################
+# SERVICES
+###############################################################
 services:
-  #######################################################
-  # CORE: VPN gateway (network namespace for *Arr stack)
-  #######################################################
+
+  ###############################################################
+  # GLUETUN (VPN)
+  ###############################################################
   gluetun:
     image: qmcgaw/gluetun
-    container_name: gluetun_vpn
-    networks: [vpn_net]
+    container_name: gluetun
+    restart: unless-stopped
+    networks:
+      - vpn_net
     cap_add:
       - NET_ADMIN
     devices:
-      - /dev/net/tun
+      - /dev/net/tun:/dev/net/tun
     environment:
       - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
       - OPENVPN_USER=${VPN_USER}
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
       - TZ=Europe/Brussels
-      # Allow inbound from Docker to these app ports inside the VPN namespace
-      - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,8787,6767,5055,9091
-      # Optional: permit local subnets if you later tighten firewall modes
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16
+      - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,8787,6767,9091
+      - VPN_HEALTHCHECK_NO_RESTART=true
     healthcheck:
       test: ["CMD-SHELL", "ping -c 1 1.1.1.1 || exit 1"]
       interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 30s
-    restart: unless-stopped
+      start_period: 20s
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.enable=false
       - autoheal=true
 
-  #######################################################
-  # MEDIA SERVER: Plex (GPU)
-  #######################################################
-  # plex:
-  #   image: lscr.io/linuxserver/plex:latest
-  #   container_name: plex_vpn
-  #   # Host mode recommended for Plex discovery/DLNA
-  #   network_mode: host
-  #   runtime: nvidia
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [gpu]
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Europe/Brussels
-  #     - VERSION=docker
-  #   volumes:
-  #     - /mnt/.ix-apps/app_mounts/plex/config:/config
-  #     - /mnt/pool-main/media/series:/tv
-  #     - /mnt/pool-main/media/movies:/movies
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -fs http://localhost:32400/web/index.html || exit 1"]
-  #     interval: 2m
-  #     timeout: 10s
-  #     retries: 3
-  #     start_period: 60s
-  #   restart: unless-stopped
-  #   labels:
-  #     - com.centurylinklabs.watchtower.enable=true
-  #     - autoheal=true
 
-  #######################################################
-  # MONITORING: Tautulli (Plex stats)
-  #######################################################
-  tautulli:
-    image: lscr.io/linuxserver/tautulli:latest
-    container_name: tautulli_vpn
-    networks: [media_net]
-    # depends_on:
-    #   - plex
+  ###############################################################
+  # NGINX PROXY MANAGER (outside VPN)
+  ###############################################################
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    networks:
+      - media_net
+      - vpn_net     # <-- IMPORTANT: allows NPM to reach Gluetun
     ports:
-      - "8181:8181"
+      - 80:80
+      - 81:81
+      - 443:443
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=Europe/Brussels
     volumes:
-      - /mnt/.ix-apps/app_mounts/tautulli/config:/config
+      - /mnt/.ix-apps/app_mounts/npm/data:/data
+      - /mnt/.ix-apps/app_mounts/npm/letsencrypt:/etc/letsencrypt
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:8181/status || exit 1"]
-      interval: 2m
+      test: ["CMD", "curl", "-fs", "http://localhost:81/login"]
+      interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 30s
-    restart: unless-stopped
+      start_period: 20s
     labels:
       - com.centurylinklabs.watchtower.enable=true
       - autoheal=true
 
-  #######################################################
-  # DOWNLOAD CLIENT: Transmission (inside VPN)
-  #######################################################
-  transmission:
-    image: lscr.io/linuxserver/transmission:latest
-    container_name: transmission_vpn
-    network_mode: "service:gluetun"
-    depends_on: [gluetun]
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-      - USER=admin
-      - PASS=${TRANSMISSION_PASSWORD}
-    volumes:
-      - /mnt/.ix-apps/app_mounts/transmission/config:/config
-      - /mnt/pool-main/media/downloads:/downloads
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:9091/transmission/web/ || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
 
-  #######################################################
-  # INDEXER MANAGER: Prowlarr (inside VPN)
-  #######################################################
-  prowlarr:
-    image: lscr.io/linuxserver/prowlarr:latest
-    container_name: prowlarr_vpn
-    network_mode: "service:gluetun"
-    depends_on: [gluetun]
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-    volumes:
-      - /mnt/.ix-apps/app_mounts/prowlarr/config:/config
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:9696 || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
+  ###############################################################
+  # ARR SERVICES (inside Gluetun)
+  ###############################################################
 
-  #######################################################
-  # ARR AUTOMATION (inside VPN)
-  #######################################################
   radarr:
     image: lscr.io/linuxserver/radarr:latest
-    container_name: radarr_vpn
+    container_name: radarr
     network_mode: "service:gluetun"
-    depends_on: [gluetun]
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       - PUID=1000
       - PGID=1000
@@ -166,22 +95,17 @@ services:
       - /mnt/.ix-apps/app_mounts/radarr/config:/config
       - /mnt/pool-main/media/movies:/movies
       - /mnt/pool-main/media/downloads:/downloads
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:7878/system/status || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
-    container_name: sonarr_vpn
+    container_name: sonarr
     network_mode: "service:gluetun"
-    depends_on: [gluetun]
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       - PUID=1000
       - PGID=1000
@@ -190,22 +114,17 @@ services:
       - /mnt/.ix-apps/app_mounts/sonarr/config:/config
       - /mnt/pool-main/media/series:/tv
       - /mnt/pool-main/media/downloads:/downloads
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:8989/system/status || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
 
   lidarr:
     image: lscr.io/linuxserver/lidarr:latest
-    container_name: lidarr_vpn
+    container_name: lidarr
     network_mode: "service:gluetun"
-    depends_on: [gluetun]
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       - PUID=1000
       - PGID=1000
@@ -214,154 +133,23 @@ services:
       - /mnt/.ix-apps/app_mounts/lidarr/config:/config
       - /mnt/pool-main/media/music:/music
       - /mnt/pool-main/media/downloads:/downloads
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:8686/system/status || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
 
-  bazarr:
-    image: lscr.io/linuxserver/bazarr:latest
-    container_name: bazarr_vpn
+  readarr:
+    image: lscr.io/linuxserver/readarr:latest
+    container_name: readarr
     network_mode: "service:gluetun"
-    depends_on: [gluetun]
+    depends_on:
+      gluetun:
+        condition: service_healthy
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Brussels
     volumes:
-      - /mnt/.ix-apps/app_mounts/bazarr/config:/config
-      - /mnt/pool-main/media/movies:/movies
-      - /mnt/pool-main/media/series:/tv
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:6767 || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
-
-  #######################################################
-  # SYNC PROFILES: Recyclarr (talks to Radarr/Sonarr)
-  #######################################################
-  recyclarr:
-    image: recyclarr/recyclarr:latest
-    container_name: recyclarr_vpn
-    networks: [media_net]   # independent; only needs outbound internet if pulling templates
-    depends_on:
-      - radarr
-      - sonarr
-    environment:
-      - TZ=Europe/Brussels
-      # Weekly sync on Sundays 03:00 (container local time)
-      - RECYCLARR_SCHEDULE=0 3 * * 0
-    volumes:
-      - /mnt/.ix-apps/app_mounts/recyclarr/config:/config
-    healthcheck:
-      test: ["CMD-SHELL", "recyclarr --version || exit 1"]
-      interval: 5m
-      timeout: 10s
-      retries: 2
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-
-  #######################################################
-  # REQUESTS PORTAL: Overseerr (inside VPN)
-  #######################################################
-  overseerr:
-    image: sctx/overseerr:latest
-    container_name: overseerr_vpn
-    network_mode: "service:gluetun"
-    depends_on: [gluetun]
-    environment:
-      - TZ=Europe/Brussels
-    volumes:
-      - /mnt/.ix-apps/app_mounts/overseerr/config:/app/config
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:5055/api/v1/status || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
-
-  #######################################################
-  # REVERSE PROXY: Nginx Proxy Manager (public-facing)
-  #######################################################
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    container_name: nginx-proxy-manager_vpn
-    networks: [media_net, vpn_net]
-    ports:
-      - "80:80"
-      - "81:81"
-      - "443:443"
-    environment:
-      - TZ=Europe/Brussels
-    volumes:
-      - /mnt/.ix-apps/app_mounts/npm/data:/data
-      - /mnt/.ix-apps/app_mounts/npm/letsencrypt:/etc/letsencrypt
-      - /mnt/.ix-apps/app_mounts/npm/logs:/logs
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:81 || exit 1"]
-      interval: 2m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
-
-  #######################################################
-  # MAINTENANCE
-  #######################################################
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower_vpn
-    networks: [media_net]
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - TZ=Europe/Brussels
-      # Weekly Sunday 03:00
-      - WATCHTOWER_SCHEDULE=0 0 3 * * 0
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_LABEL_ENABLE=true
-      - WATCHTOWER_NO_STARTUP_MESSAGE=true
-    restart: unless-stopped
-
-  autoheal:
-    image: willfarrell/autoheal:latest
-    container_name: autoheal_vpn
-    networks: [media_net]
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=autoheal
-      - AUTOHEAL_INTERVAL=30
-      - AUTOHEAL_START_PERIOD=300
-      - AUTOHEAL_DEFAULT_STOP_TIMEOUT=30
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-
-############################
-# NETWORKS
-############################
-networks:
-  vpn_net:
-    driver: bridge
-  media_net:
-    driver: bridge
+      - /mnt/.ix-apps/app_mounts/readarr/config:/config
+      - /mnt/pool-main/media/books:/books
+      - /mnt/pool-main/media/downloads:/downloads
+    res
