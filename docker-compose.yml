@@ -137,25 +137,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
 
-  readarr:
-    image: lscr.io/linuxserver/readarr:latest
-    container_name: readarr
-    network_mode: "service:gluetun"
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-    volumes:
-      - /mnt/.ix-apps/app_mounts/readarr/config:/config
-      - /mnt/pool-main/media/books:/books
-      - /mnt/pool-main/media/downloads:/downloads
-    restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
