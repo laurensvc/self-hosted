@@ -191,6 +191,8 @@ services:
     restart: unless-stopped
     networks:
       - media_net
+    ports:
+      - 5055:5055
     environment:
       - TZ=Europe/Brussels
     volumes:
