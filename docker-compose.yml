@@ -102,8 +102,8 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/radarr/config:/config
-      - /mnt/pool-main/media/movies:/movies
-      - /mnt/pool-main/media/downloads:/downloads
+      - /mnt/pool-main/plex-media/movies:/movies
+      - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -121,8 +121,8 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/sonarr/config:/config
-      - /mnt/pool-main/media/series:/tv
-      - /mnt/pool-main/media/downloads:/downloads
+      - /mnt/pool-main/plex-media/series:/tv
+      - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -140,8 +140,8 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/lidarr/config:/config
-      - /mnt/pool-main/media/music:/music
-      - /mnt/pool-main/media/downloads:/downloads
+      - /mnt/pool-main/plex-media/music:/music
+      - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -176,8 +176,8 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/bazarr/config:/config
-      - /mnt/pool-main/media/movies:/movies
-      - /mnt/pool-main/media/series:/tv
+      - /mnt/pool-main/plex-media/movies:/movies
+      - /mnt/pool-main/plex-media/series:/tv
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -226,7 +226,7 @@ services:
       - PASS=${TRANSMISSION_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/transmission/config:/config
-      - /mnt/pool-main/media/downloads:/downloads
+      - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -246,7 +246,7 @@ services:
       - NZBGET_PASS=${NZBGET_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/nzbget/config:/config
-      - /mnt/pool-main/media/downloads:/downloads
+      - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
