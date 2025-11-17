@@ -102,7 +102,7 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/radarr/config:/config
-      - /mnt/pool-main/plex-media/movies:/movies
+      - /mnt/pool-main/plex-media/Movies:/movies
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
@@ -121,7 +121,7 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/sonarr/config:/config
-      - /mnt/pool-main/plex-media/series:/tv
+      - /mnt/pool-main/plex-media/Series:/series
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
@@ -140,7 +140,7 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/lidarr/config:/config
-      - /mnt/pool-main/plex-media/music:/music
+      - /mnt/pool-main/plex-media/Music:/music
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
     labels:
@@ -176,8 +176,8 @@ services:
       - TZ=Europe/Brussels
     volumes:
       - /mnt/.ix-apps/app_mounts/bazarr/config:/config
-      - /mnt/pool-main/plex-media/movies:/movies
-      - /mnt/pool-main/plex-media/series:/tv
+      - /mnt/pool-main/plex-media/Movies:/movies
+      - /mnt/pool-main/plex-media/Series:/series
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
