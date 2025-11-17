@@ -41,7 +41,7 @@ services:
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
       - TZ=Europe/Brussels
-      - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,8787,6767,9091
+      - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,6767,5055,9091
       - VPN_HEALTHCHECK_NO_RESTART=true
     healthcheck:
       test: ["CMD-SHELL", "ping -c 1 1.1.1.1 || exit 1"]
