@@ -196,11 +196,11 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/overseerr/config:/app/config
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:5055/api/v1/status || exit 1"]
-      interval: 60s
+      test: ["CMD", "node", "--version"]
+      interval: 5m
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 60s
     labels:
       - com.centurylinklabs.watchtower.enable=true
       - autoheal=true
