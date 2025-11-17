@@ -29,9 +29,8 @@ services:
       - 9696:9696     # Prowlarr
       - 8686:8686     # Lidarr
       - 6767:6767     # Bazarr
-      # - 5055:5055     # Overseerr (this port is exposed on overseer container itself)
       - 9091:9091     # Transmission
-      - 6789:6789     # NZBGet 
+      - 6789:6789     # NZBGet
     cap_add:
       - NET_ADMIN
     devices:
@@ -42,7 +41,7 @@ services:
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
       - TZ=Europe/Brussels
-      - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,6767,5055,9091
+      - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,6767,9091,6789
       - VPN_HEALTHCHECK_NO_RESTART=true
     healthcheck:
       test: ["CMD-SHELL", "ping -c 1 1.1.1.1 || exit 1"]
@@ -52,11 +51,11 @@ services:
       start_period: 20s
     labels:
       - com.centurylinklabs.watchtower.enable=false
-      - autoheal=true
+      # - autoheal=true   # REMOVE for stability!
 
 
   ###############################################################
-  # NGINX PROXY MANAGER (outside VPN)
+  # NGINX PROXY MANAGER (optional)
   ###############################################################
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
@@ -64,7 +63,7 @@ services:
     restart: unless-stopped
     networks:
       - media_net
-      - vpn_net     # <-- IMPORTANT: allows NPM to reach Gluetun
+      - vpn_net
     ports:
       - 80:80
       - 81:81
@@ -82,13 +81,12 @@ services:
       start_period: 20s
     labels:
       - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
+      # - autoheal=true   # REMOVE for stability!
 
 
   ###############################################################
   # ARR SERVICES (inside Gluetun)
   ###############################################################
-
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -105,8 +103,6 @@ services:
       - /mnt/pool-main/plex-media/Movies:/movies
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
@@ -124,8 +120,6 @@ services:
       - /mnt/pool-main/plex-media/Series:/series
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
 
   lidarr:
     image: lscr.io/linuxserver/lidarr:latest
@@ -143,8 +137,6 @@ services:
       - /mnt/pool-main/plex-media/Music:/music
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -160,8 +152,6 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/prowlarr/config:/config
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
@@ -179,12 +169,10 @@ services:
       - /mnt/pool-main/plex-media/Movies:/movies
       - /mnt/pool-main/plex-media/Series:/series
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
 
 
   ###############################################################
-  # OVERSEERR (outside VPN so NPM can access it)
+  # OVERSEERR (outside VPN)
   ###############################################################
   overseerr:
     image: sctx/overseerr:latest
@@ -206,7 +194,8 @@ services:
       start_period: 60s
     labels:
       - com.centurylinklabs.watchtower.enable=true
-      - autoheal=true
+      # - autoheal=true   # REMOVE for stability!
+
 
   ###############################################################
   # TRANSMISSION & NZBGET (inside Gluetun)
@@ -228,8 +217,6 @@ services:
       - /mnt/.ix-apps/app_mounts/transmission/config:/config
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
 
   nzbget:
     image: lscr.io/linuxserver/nzbget:latest
@@ -248,9 +235,6 @@ services:
       - /mnt/.ix-apps/app_mounts/nzbget/config:/config
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-
 
 
   ###############################################################
