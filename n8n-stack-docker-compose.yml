@@ -32,7 +32,7 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/automation/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 30s
       timeout: 10s
       retries: 5
