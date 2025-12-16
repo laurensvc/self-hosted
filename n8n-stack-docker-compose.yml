@@ -170,7 +170,7 @@ services:
     environment:
       TZ: ${TZ}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD-SHELL", "ollama list || exit 1"]
       interval: 60s
       timeout: 10s
       retries: 3
