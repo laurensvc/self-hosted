@@ -1,0 +1,235 @@
+version: "3.8"
+
+###############################################################
+# NETWORKS
+###############################################################
+networks:
+  automation_net:
+    driver: bridge
+  ai_net:
+    driver: bridge
+  public_net:
+    driver: bridge
+
+  ###############################################################
+  # SERVICES
+  ###############################################################
+
+  ###############################################################
+  # POSTGRES (SHARED DATABASE)
+  ###############################################################
+  postgres:
+    image: postgres:16.3
+    container_name: automation-postgres
+    restart: unless-stopped
+    networks:
+      - automation_net
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: Europe/Brussels
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  ###############################################################
+  # N8N (AUTOMATION BRAIN)
+  ###############################################################
+  n8n:
+    image: n8nio/n8n:1.41.0
+    container_name: n8n
+    restart: unless-stopped
+    networks:
+      - automation_net
+      - public_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: https
+      N8N_PORT: 5678
+      WEBHOOK_URL: https://${N8N_HOST}/
+      GENERIC_TIMEZONE: Europe/Brussels
+
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+
+      # SMTP (transactional only)
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_SENDER: ${SMTP_FROM}
+
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/n8n:/home/node/.n8n
+    ports:
+      - 5678:5678 # remove once behind NPM
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5678/healthz"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  ###############################################################
+  # BASEROW (CRM / FUNNEL STATE)
+  ###############################################################
+  baserow:
+    image: baserow/baserow:1.25.0
+    container_name: baserow
+    restart: unless-stopped
+    networks:
+      - automation_net
+      - public_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_PORT: 5432
+      TZ: Europe/Brussels
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/baserow:/baserow/media
+    ports:
+      - 8080:80 # remove once behind NPM
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  ###############################################################
+  # OLLAMA (LLM ENGINE - GPU ENABLED)
+  ###############################################################
+  ollama:
+    image: ollama/ollama:0.1.48
+    container_name: ollama
+    restart: unless-stopped
+    networks:
+      - ai_net
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/ollama:/root/.ollama
+    ports:
+      - 11434:11434 # internal use, optional
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - TZ=Europe/Brussels
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  ###############################################################
+  # ANYTHINGLLM (AI SERVICE LAYER)
+  ###############################################################
+  anythingllm:
+    image: mintplexlabs/anythingllm:1.5.6
+    container_name: anythingllm
+    restart: unless-stopped
+    networks:
+      - ai_net
+      - automation_net
+      - public_net
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      STORAGE_DIR: /app/server/storage
+      JWT_SECRET: ${ANYTHINGLLM_JWT_SECRET}
+
+      LLM_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: llama3.1
+
+      VECTOR_DB: local
+      TZ: Europe/Brussels
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/anythingllm:/app/server/storage
+    ports:
+      - 3002:3001 # remove once behind NPM
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  ###############################################################
+  # UPTIME KUMA (MONITORING)
+  ###############################################################
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.13
+    container_name: uptime-kuma
+    restart: unless-stopped
+    networks:
+      - public_net
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/uptime-kuma:/app/data
+    ports:
+      - 3001:3001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  ###############################################################
+  # WATCHTOWER (SELECTIVE UPDATES)
+  ###############################################################
+  watchtower:
+    image: containrrr/watchtower:1.7.1
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: Europe/Brussels
+      WATCHTOWER_SCHEDULE: 0 0 3 * * 0
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_LABEL_ENABLE: "true"
