@@ -51,6 +51,8 @@ services:
     environment:
       PUID: 1000
       PGID: 1000
+      DEBUG: "*"
+
       # Database
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: postgres
