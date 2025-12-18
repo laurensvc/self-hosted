@@ -15,7 +15,7 @@ services:
   # POSTGRES (N8N DATABASE)
   ###############################################################
   postgres:
-    image: postgres:16.3
+    image: postgres:latest
     container_name: n8n-postgres
     restart: unless-stopped
     networks:
@@ -40,7 +40,7 @@ services:
   # N8N (AUTOMATION BRAIN)
   ###############################################################
   n8n:
-    image: n8nio/n8n:1.41.0
+    image: n8nio/n8n:latest
     container_name: n8n
     restart: unless-stopped
     networks:
@@ -49,8 +49,6 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      PUID: 1000
-      PGID: 1000
       DEBUG: "*"
 
       # Database
