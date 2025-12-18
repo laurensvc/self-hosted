@@ -49,6 +49,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      PUID: 1000
+      PGID: 1000
       # Database
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: postgres
@@ -63,6 +65,7 @@ services:
       WEBHOOK_URL: http://${N8N_HOST}:5678/
       GENERIC_TIMEZONE: ${TZ}
 
+      # User and group
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
 
       # Auth
