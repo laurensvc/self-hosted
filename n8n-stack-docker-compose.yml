@@ -15,7 +15,7 @@ services:
   # POSTGRES (N8N DATABASE)
   ###############################################################
   postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
     container_name: n8n-postgres
     restart: unless-stopped
     networks:
@@ -40,7 +40,7 @@ services:
   # N8N (AUTOMATION BRAIN)
   ###############################################################
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.0.3
     container_name: n8n
     restart: unless-stopped
     networks:
