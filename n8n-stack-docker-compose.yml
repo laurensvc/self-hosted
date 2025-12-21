@@ -15,7 +15,7 @@ services:
   # POSTGRES (N8N DATABASE)
   ###############################################################
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: n8n-postgres
     restart: unless-stopped
     networks:
