@@ -47,6 +47,8 @@ services:
       - automation_net
     environment:
       TZ: ${TZ}
+      PUID: 1000
+      PGID: 1000
       PORT: 3001
       SERVER_PORT: 3001
       STORAGE_DIR: /app/server/storage
