@@ -37,6 +37,72 @@ services:
       - com.centurylinklabs.watchtower.enable=false
 
   ###############################################################
+  # QDRANT (VECTOR DATABASE FOR ANYTHINGLLM)
+  ###############################################################
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: anythingllm-qdrant
+    restart: unless-stopped
+    networks:
+      - automation_net
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/qdrant:/qdrant/storage
+    ports:
+      - 6333:6333
+      - 6334:6334
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:6333/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  ###############################################################
+  # ANYTHINGLLM (AI AGENT)
+  ###############################################################
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    container_name: anythingllm
+    restart: unless-stopped
+    networks:
+      - automation_net
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ}
+      VECTOR_DB: qdrant
+      QDRANT_ENDPOINT: http://qdrant:6333
+      QDRANT_API_KEY: ''
+      SERVER_PORT: 3001
+      STORAGE_DIR: /app/server/storage
+      # API_KEY: ${ANYTHINGLLM_API_KEY:-}
+      # JWT_SECRET: ${ANYTHINGLLM_JWT_SECRET:-}
+      # JWT_EXPIRES_IN: 24h
+      # LLM_PROVIDER: ${ANYTHINGLLM_LLM_PROVIDER:-openai}
+      # LLM_MODEL_PREF: ${ANYTHINGLLM_LLM_MODEL:-gpt-3.5-turbo}
+      # LLM_BASE_PATH: ${ANYTHINGLLM_LLM_BASE_PATH:-}
+      # LLM_API_KEY: ${ANYTHINGLLM_LLM_API_KEY:-}
+      # EMBEDDING_PROVIDER: ${ANYTHINGLLM_EMBEDDING_PROVIDER:-openai}
+      # EMBEDDING_BASE_PATH: ${ANYTHINGLLM_EMBEDDING_BASE_PATH:-}
+      # EMBEDDING_API_KEY: ${ANYTHINGLLM_EMBEDDING_API_KEY:-}
+      # EMBEDDING_MODEL_PREF: ${ANYTHINGLLM_EMBEDDING_MODEL:-text-embedding-3-small}
+    volumes:
+      - /mnt/.ix-apps/app_mounts/automation/anythingllm:/app/server/storage
+    ports:
+      - 3001:3001
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/api/health']
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - com.centurylinklabs.watchtower.enable=false
+
+  ###############################################################
   # N8N (AUTOMATION BRAIN)
   ###############################################################
   n8n:
