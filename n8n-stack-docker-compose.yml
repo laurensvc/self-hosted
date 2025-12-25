@@ -37,29 +37,6 @@ services:
       - com.centurylinklabs.watchtower.enable=false
 
   ###############################################################
-  # QDRANT (VECTOR DATABASE FOR ANYTHINGLLM)
-  ###############################################################
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: anythingllm-qdrant
-    restart: unless-stopped
-    networks:
-      - automation_net
-    volumes:
-      - /mnt/.ix-apps/app_mounts/automation/qdrant:/qdrant/storage
-    ports:
-      - 6333:6333
-      - 6334:6334
-    healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:6333/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    labels:
-      - com.centurylinklabs.watchtower.enable=false
-
-  ###############################################################
   # ANYTHINGLLM (AI AGENT)
   ###############################################################
   anythingllm:
@@ -68,9 +45,6 @@ services:
     restart: unless-stopped
     networks:
       - automation_net
-    depends_on:
-      qdrant:
-        condition: service_healthy
     environment:
       TZ: ${TZ}
       # VECTOR_DB: qdrant
