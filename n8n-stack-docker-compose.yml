@@ -59,11 +59,11 @@ services:
               count: 1
               capabilities: [gpu]
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:11434/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      test: ollama list || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
     labels:
       - com.centurylinklabs.watchtower.enable=false
 
