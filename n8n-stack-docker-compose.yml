@@ -60,10 +60,7 @@ services:
               capabilities: [gpu]
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:11434 || exit 1",
-        ]
+        - curl 'http://localhost:11434/ || exit 1'
       interval: 30s
       timeout: 10s
       retries: 3
