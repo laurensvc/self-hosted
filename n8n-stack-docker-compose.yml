@@ -242,7 +242,7 @@ services:
       - /mnt/.ix-apps/app_mounts/automation/baserow:/baserow/data
     ports:
       - 8082:80
-      - 8443:443
+      - 9443:443
     healthcheck:
       test: ["CMD", "./baserow.sh", "backend-cmd", "backend-healthcheck"]
       interval: 60s
