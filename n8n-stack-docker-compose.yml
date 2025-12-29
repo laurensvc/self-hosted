@@ -45,11 +45,19 @@ services:
     restart: unless-stopped
     networks:
       - automation_net
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${BASEROW_REDIS_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/automation/redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-a",
+          "${BASEROW_REDIS_PASSWORD}",
+          "--no-auth-warning",
+          "ping",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -246,12 +254,10 @@ services:
       BASEROW_PUBLIC_URL: http://baserow:80
       # Allow internal hostname for API access
       BASEROW_EXTRA_ALLOWED_HOSTS: baserow
-      # Use external Redis instance
+      # Use external Redis instance with password
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
-      # Disable embedded Redis to force external Redis usage
-      BASEROW_REDIS_URL: redis://redis:6379/0
+      REDIS_PASSWORD: ${BASEROW_REDIS_PASSWORD}
     volumes:
       - /mnt/.ix-apps/app_mounts/automation/baserow:/baserow/data
     ports:
