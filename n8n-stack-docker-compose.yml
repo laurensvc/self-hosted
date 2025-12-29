@@ -253,7 +253,7 @@ services:
       # Public URL - Set this to the URL you use to access Baserow in your browser
       # Examples: http://your-server-ip:8082 or http://baserow.yourdomain.com
       # If using reverse proxy, use your domain name
-      BASEROW_PUBLIC_URL: ${BASEROW_INTERNAL_URL}
+      BASEROW_PUBLIC_URL: ${BASEROW_INTERNAL_URL}:8082
       # Allow internal hostname and external access
       BASEROW_EXTRA_ALLOWED_HOSTS: ${BASEROW_INTERNAL_URL}
       # Use external Redis instance with password
