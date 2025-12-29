@@ -250,10 +250,10 @@ services:
         condition: service_healthy
     environment:
       TZ: ${TZ}
-      # Public URL - Set this to the URL you use to access Baserow in your browser
-      # BASEROW_INTERNAL_URL should be set to your server IP (e.g., 192.168.1.53)
-      # This constructs: http://192.168.1.53:8082
-      BASEROW_PUBLIC_URL: http://${BASEROW_INTERNAL_URL}:8082
+      # Public URL - Set BASEROW_PUBLIC_URL in your .env file or Portainer
+      # Example: BASEROW_PUBLIC_URL=http://192.168.1.53:8082
+      # If not set, defaults to http://192.168.1.53:8082
+      BASEROW_PUBLIC_URL: ${BASEROW_PUBLIC_URL:-http://192.168.1.53:8082}
       # Allow internal hostname and external IP access
       # BASEROW_EXTRA_ALLOWED_HOSTS should be comma-separated hostnames/IPs (no http://)
       BASEROW_EXTRA_ALLOWED_HOSTS: baserow,${BASEROW_INTERNAL_URL},localhost
