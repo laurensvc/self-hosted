@@ -262,9 +262,11 @@ services:
       BASEROW_PUBLIC_URL: http://baserow:80
       # Allow internal hostname for API access
       BASEROW_EXTRA_ALLOWED_HOSTS: baserow
-      # Use external Redis instance
+      # Use external Redis instance (no password configured)
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      # Note: If Baserow still tries to authenticate, delete the .redispass file
+      # from /mnt/.ix-apps/app_mounts/automation/baserow/.redispass in Portainer
     volumes:
       - /mnt/.ix-apps/app_mounts/automation/baserow:/baserow/data
     ports:
