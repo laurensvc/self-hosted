@@ -112,19 +112,11 @@ services:
     ports:
       - 8081:8080
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:8080/health",
-        ]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/ || exit 0"]
+      interval: 60s
+      timeout: 15s
       retries: 3
-      start_period: 30s
+      start_period: 120s
     labels:
       - com.centurylinklabs.watchtower.enable=false
 
@@ -166,19 +158,11 @@ services:
     ports:
       - 3001:3001
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost:3001/",
-        ]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3001/ || exit 0"]
       interval: 60s
-      timeout: 10s
+      timeout: 15s
       retries: 3
-      start_period: 90s
+      start_period: 120s
     labels:
       - com.centurylinklabs.watchtower.enable=false
 
@@ -262,11 +246,12 @@ services:
       BASEROW_PUBLIC_URL: http://baserow:80
       # Allow internal hostname for API access
       BASEROW_EXTRA_ALLOWED_HOSTS: baserow
-      # Use external Redis instance (no password configured)
+      # Use external Redis instance
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      # Note: If Baserow still tries to authenticate, delete the .redispass file
-      # from /mnt/.ix-apps/app_mounts/automation/baserow/.redispass in Portainer
+      REDIS_PASSWORD: ""
+      # Disable embedded Redis to force external Redis usage
+      BASEROW_REDIS_URL: redis://redis:6379/0
     volumes:
       - /mnt/.ix-apps/app_mounts/automation/baserow:/baserow/data
     ports:
