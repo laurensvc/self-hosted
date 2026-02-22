@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  pinokio:
+    image: olilanz/pinokio3-unraid-nvidia:latest
+    container_name: pinokio
+    restart: unless-stopped
+
+    ports:
+      - "42000:42000"
+
+    # Persistente data op je dataset
+    volumes:
+      - /mnt/pool-main/ai-dock/pinokio/data:/root/pinokio
+      - /mnt/pool-main/ai-dock/pinokio/config:/root/.config/Pinokio
+
+    # Handig voor zware webapps/AI installers in Electron/Chromium
+    shm_size: "2gb"
+
+    # GPU (kies wat bij jouw Portainer setup werkt)
+    # Optie 1 (werkt vaak in compose/standalone):
+    runtime: nvidia
+    environment:
+      - TZ=Europe/Brussels
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
