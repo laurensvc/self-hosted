@@ -10,6 +10,9 @@ services:
       - "42000:42000"
 
     # Persistente data op je dataset
+    # Maak de mappen eerst op de host (voorkomt chmod "operation not permitted" op pool/NFS):
+    #   sudo mkdir -p /mnt/pool-main/ai-dock/pinokio/data /mnt/pool-main/ai-dock/pinokio/config
+    #   sudo chown -R 0:0 /mnt/pool-main/ai-dock/pinokio
     volumes:
       - /mnt/pool-main/ai-dock/pinokio/data:/root/pinokio
       - /mnt/pool-main/ai-dock/pinokio/config:/root/.config/Pinokio
