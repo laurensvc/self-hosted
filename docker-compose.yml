@@ -184,14 +184,10 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/overseerr/config:/app/config
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1",
-        ]
-      start_period: 20s
-      timeout: 3s
-      interval: 15s
+      test: ["CMD", "node", "--version"]
+      start_period: 60s
+      timeout: 10s
+      interval: 5m
       retries: 3
     labels:
       - com.centurylinklabs.watchtower.enable=true
