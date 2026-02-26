@@ -13,7 +13,6 @@ networks:
 # SERVICES
 ###############################################################
 services:
-
   ###############################################################
   # GLUETUN (VPN)
   ###############################################################
@@ -24,13 +23,13 @@ services:
     networks:
       - vpn_net
     ports:
-      - 7878:7878     # Radarr
-      - 8989:8989     # Sonarr
-      - 9696:9696     # Prowlarr
-      - 8686:8686     # Lidarr
-      - 6767:6767     # Bazarr
-      - 9091:9091     # Transmission
-      - 6789:6789     # NZBGet
+      - 7878:7878 # Radarr
+      - 8989:8989 # Sonarr
+      - 9696:9696 # Prowlarr
+      - 8686:8686 # Lidarr
+      - 6767:6767 # Bazarr
+      - 9091:9091 # Transmission
+      - 6789:6789 # NZBGet
     cap_add:
       - NET_ADMIN
     devices:
@@ -52,7 +51,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=false
       # - autoheal=true   # REMOVE for stability!
-
 
   ###############################################################
   # NGINX PROXY MANAGER (optional)
@@ -82,7 +80,6 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
       # - autoheal=true   # REMOVE for stability!
-
 
   ###############################################################
   # ARR SERVICES (inside Gluetun)
@@ -170,13 +167,13 @@ services:
       - /mnt/pool-main/plex-media/Series:/series
     restart: unless-stopped
 
-
   ###############################################################
-  # OVERSEERR (outside VPN)
+  # SEERR (outside VPN)
   ###############################################################
-  overseerr:
-    image: sctx/overseerr:latest
-    container_name: overseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
     restart: unless-stopped
     networks:
       - media_net
@@ -187,15 +184,18 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/overseerr/config:/app/config
     healthcheck:
-      test: ["CMD", "node", "--version"]
-      interval: 5m
-      timeout: 10s
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1",
+        ]
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
       retries: 3
-      start_period: 60s
     labels:
       - com.centurylinklabs.watchtower.enable=true
       # - autoheal=true   # REMOVE for stability!
-
 
   ###############################################################
   # TRANSMISSION & NZBGET (inside Gluetun)
@@ -236,7 +236,6 @@ services:
       - /mnt/pool-main/plex-media/downloads:/downloads
     restart: unless-stopped
 
-
   ###############################################################
   # RECYCLARR
   ###############################################################
@@ -254,7 +253,6 @@ services:
     volumes:
       - /mnt/.ix-apps/app_mounts/recyclarr/config:/config
 
-
   ###############################################################
   # WATCHTOWER
   ###############################################################
@@ -269,7 +267,6 @@ services:
       - WATCHTOWER_SCHEDULE=0 0 3 * * 0
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_LABEL_ENABLE=true
-
 
   ###############################################################
   # AUTOHEAL
