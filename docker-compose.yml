@@ -36,20 +36,22 @@ services:
       - '6789:6789' # NZBGet
     environment:
       - TZ=Europe/Brussels
-
-      # VPN provider settings
       - VPN_SERVICE_PROVIDER=${VPN_SERVICE_PROVIDER}
       - OPENVPN_USER=${VPN_USER}
       - OPENVPN_PASSWORD=${VPN_PASSWORD}
       - SERVER_COUNTRIES=Switzerland
 
-      # Firewall / routing
       - FIREWALL=on
       - FIREWALL_VPN_INPUT_PORTS=7878,8989,9696,8686,6767,9091,6789
 
-      # DNS / healthcheck stability
-      - DOT=off
-      - DNS_ADDRESS=1.1.1.1,1.0.0.1
+      # Encrypted DNS via DNS-over-HTTPS
+      - DNS_SERVER=on
+      - DNS_ADDRESS=127.0.0.1
+      - DNS_UPSTREAM_RESOLVER_TYPE=doh
+      - DNS_KEEP_NAMESERVER=off
+      - DNS_UPSTREAM_IPV6=off
+
+      # Keeps Gluetun from hard-restarting itself while testing
       - VPN_HEALTHCHECK_NO_RESTART=true
 
     healthcheck:
@@ -196,10 +198,10 @@ services:
       - /mnt/.ix-apps/app_mounts/overseerr/config:/app/config
     healthcheck:
       test: ['CMD', 'node', '--version']
-      interval: 5m
-      timeout: 10s
-      retries: 3
       start_period: 60s
+      timeout: 10s
+      interval: 5m
+      retries: 3
     labels:
       - com.centurylinklabs.watchtower.enable=true
 
